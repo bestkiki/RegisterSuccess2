@@ -3,6 +3,9 @@ package kiki.entertainment.ggomagyun.registeration3;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -18,6 +21,7 @@ public class ManagementActivity extends AppCompatActivity {
     private ListView listView;
     private UserListAdapter adapter;
     private List<User> userList;
+    private List<User> saveList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +31,8 @@ public class ManagementActivity extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.listView);
         userList = new ArrayList<User>();
-
-        adapter = new UserListAdapter(getApplicationContext(), userList, this);
+        saveList = new ArrayList<User>();
+        adapter = new UserListAdapter(getApplicationContext(), userList, this, saveList);
         listView.setAdapter(adapter);
 
         try {
@@ -44,13 +48,45 @@ public class ManagementActivity extends AppCompatActivity {
                 userName = object.getString("userName");
                 userAge = object.getString("userAge");
                 User user = new User(userID,userPassword,userName,userAge);
-                if(!userID.equals("admin"))
+                if(!userID.equals("admin")) {
                     userList.add(user);
-                count++;
+                    saveList.add(user);
+                }
+                    count++;
             }
         } catch (Exception e){
             e.printStackTrace();
         }
 
+        EditText search = (EditText) findViewById(R.id.search);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override //텍스트가 바뀔때마다 실행되는 함수
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                searchUser(charSequence.toString());
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+    }
+
+    public void searchUser(String search){
+        userList.clear();
+        for(int i=0; i<saveList.size(); i++){
+            if(saveList.get(i).getUserID().contains(search))
+            {
+                userList.add(saveList.get(i));
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 }
